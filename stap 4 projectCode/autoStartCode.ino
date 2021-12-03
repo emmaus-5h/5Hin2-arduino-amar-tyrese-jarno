@@ -75,7 +75,43 @@ long readDistance(int triggerPin, int echoPin)
   return echoTime;
 }
 
-void testLoop() {
+
+
+/*****************************************
+ * setup() en loop()                     *
+ *****************************************/
+
+void setup() {
+  // pinnen voor afstandssensor worden
+  // voor elke meting in readDistance()
+  // in de goede mode gezet
+
+  // zet pinmode voor motor aansturing via PWM
+  pinMode(pinMotorSnelheidL, OUTPUT);
+  pinMode(pinMotorSnelheidR, OUTPUT);
+
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+
+  // enable console
+  Serial.begin(9600);
+
+  // opstart bericht op console en seriële monitor
+  lcd.setCursor(0, 0); // zet cursor op het begin van de bovenste regel
+  lcd.print("Auto v20201021");
+  lcd.setCursor(0, 1); // zet cursor op het begin van de onderste regel
+  lcd.print("SETUP");// print demo bericht
+  Serial.println("Auto start");
+  delay(2000); // wachttijd om het display te lezen en de auto neer te zetten
+
+  // zet toestanden en in beginstand
+  toestand = TEST;
+  toestandStartTijd = millis();
+  testToestand = RECHTSAF;
+  testToestandStartTijd = millis();
+}
+
+void loop() {
   // lees afstandssensoren uit
   // dit is nodig voor alle test toestanden
   // omrekenen naar centimeters = milliseconden / 29 / 2
@@ -143,73 +179,4 @@ void testLoop() {
   Serial.print(regelBoven);
   Serial.print("--");
   Serial.println(regelOnder);
-}
-
-/*****************************************
- * setup() en loop()                     *
- *****************************************/
-
-void setup() {
-  // pinnen voor afstandssensor worden
-  // voor elke meting in readDistance()
-  // in de goede mode gezet
-
-  // zet pinmode voor motor aansturing via PWM
-  pinMode(pinMotorSnelheidL, OUTPUT);
-  pinMode(pinMotorSnelheidR, OUTPUT);
-
-  // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
-
-  // enable console
-  Serial.begin(9600);
-
-  // opstart bericht op console en seriële monitor
-  lcd.setCursor(0, 0); // zet cursor op het begin van de bovenste regel
-  lcd.print("Auto v20201021");
-  lcd.setCursor(0, 1); // zet cursor op het begin van de onderste regel
-  lcd.print("SETUP");// print demo bericht
-  Serial.println("Auto start");
-  delay(2000); // wachttijd om het display te lezen en de auto neer te zetten
-
-  // zet toestanden en in beginstand
-  toestand = TEST;
-  toestandStartTijd = millis();
-  testToestand = RECHTSAF;
-  testToestandStartTijd = millis();
-}
-
-void loop()
-{
-  // toestand bepalen
-  if (toestand == TEST) {
-    if (millis() - toestandStartTijd > 30000) {
-      toestandStartTijd = millis();
-      toestand = STOP;
-    }
-  }
-  if (toestand == STOP) {
-    // de auto blijft in de toestand STOP
-  }
-
-  // de dingen doen die per toestand gedaan worden
-  if (toestand == TEST) {
-    testLoop();
-  }
-  if (toestand == STOP) {
-    // zet motoren stil
-    analogWrite(pinMotorSnelheidR, 0);
-    analogWrite(pinMotorSnelheidL, 0);
-    // zet tekst op display
-    regelBoven = "                ";
-    regelOnder = "      STOP      ";
-    lcd.setCursor(0, 0); // zet cursor op het begin van de bovenste regel
-    lcd.print(regelBoven);
-    lcd.setCursor(0, 1); // zet cursor op het begin van de onderste regel
-    lcd.print(regelOnder);
-    Serial.println("STOP");
-  }
-
-  // vertraging om te zorgen dat de seriële monitor de berichten bijhoudt
-  delay(100);
 }
